@@ -1,0 +1,5 @@
+{
+    "sketch": "Task2a.ino",
+    "output": "build",
+    "board": "arduino:avr:uno"
+}
