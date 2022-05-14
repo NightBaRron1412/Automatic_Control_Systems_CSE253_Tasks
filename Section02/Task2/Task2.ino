@@ -10,7 +10,7 @@ void setup()
     pinMode(redLED, OUTPUT);   /* Setting the red LED as output */
     pinMode(greenLED, OUTPUT); /* Setting the green LED as output */
 
-    Serial.begin(9600) /* Starting Serial with 9600 baud rate */;
+    Serial.begin(9600); /* Starting Serial with 9600 baud rate */
 }
 
 void loop()
