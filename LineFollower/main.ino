@@ -125,12 +125,12 @@ void VidError(uint8_t Copy_u8SensorsReading)
 }
 
 /*-------------------------- PID control Section -------------------*/
-float f32CalcPID(uint8_t Copy_TrackError)
+float f32CalcPID(uint8_t Copy_u8TrackError)
 {
     float Local_f32ErrorDiff;
     float Local_f32Output;
-    f32Error = f32Error * 0.7 + Copy_TrackError * 0.3; /* Filtering the error value */
-    /* error = Copy_TrackError; */
+    f32Error = f32Error * 0.7 + Copy_u8TrackError * 0.3; /* Filtering the error value */
+    /* error = Copy_u8TrackError; */
     Local_f32ErrorDiff = f32Error - f32ErrorLast;                                          /* Calculating the error difference */
     f32ErrorInt = constrain(f32ErrorInt + f32Error, -50, 50);                              /* Calculating the integral error */
     Local_f32Output = f32Kp * f32Error + f32Ki * f32ErrorInt + f32Kd * Local_f32ErrorDiff; /* Calculating the PID output */
@@ -141,29 +141,29 @@ float f32CalcPID(uint8_t Copy_TrackError)
 }
 
 /*--------------------------SPEED control Section-------------------*/
-void VidSpeedLogic(uint8_t Copy_SpdL, uint8_t Copy_SpdR)
+void VidSpeedLogic(uint8_t Copy_u8SpdL, uint8_t Copy_u8SpdR)
 {
-    Copy_SpdR = -Copy_SpdR;
+    Copy_u8SpdR = -Copy_u8SpdR;
 
-    if (Copy_SpdL < 0)
+    if (Copy_u8SpdL < 0)
     {
         analogWrite(MOTOR_CONTROL2, 0);
-        analogWrite(MOTOR_CONTROL1, -Copy_SpdL);
+        analogWrite(MOTOR_CONTROL1, -Copy_u8SpdL);
     }
     else
     {
-        analogWrite(MOTOR_CONTROL2, Copy_SpdL);
+        analogWrite(MOTOR_CONTROL2, Copy_u8SpdL);
         analogWrite(MOTOR_CONTROL1, 0);
     }
 
-    if (Copy_SpdR < 0)
+    if (Copy_u8SpdR < 0)
     {
         analogWrite(MOTOR_CONTROL3, 0);
-        analogWrite(MOTOR_CONTROL4, -Copy_SpdR);
+        analogWrite(MOTOR_CONTROL4, -Copy_u8SpdR);
     }
     else
     {
-        analogWrite(MOTOR_CONTROL3, Copy_SpdR);
+        analogWrite(MOTOR_CONTROL3, Copy_u8SpdR);
         analogWrite(MOTOR_CONTROL4, 0);
     }
 }

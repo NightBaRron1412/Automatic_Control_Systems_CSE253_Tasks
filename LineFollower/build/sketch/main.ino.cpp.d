@@ -10,4 +10,5 @@ d:\Automatic\ Control\ Systems\ Tasks\LineFollower\build\sketch\main.ino.cpp.o: 
  C:\Users\amoor\AppData\Local\Arduino15\packages\arduino\hardware\avr\1.8.5\cores\arduino/Printable.h \
  C:\Users\amoor\AppData\Local\Arduino15\packages\arduino\hardware\avr\1.8.5\cores\arduino/USBAPI.h \
  C:\Users\amoor\AppData\Local\Arduino15\packages\arduino\hardware\avr\1.8.5\cores\arduino/Arduino.h \
- C:\Users\amoor\AppData\Local\Arduino15\packages\arduino\hardware\avr\1.8.5\variants\standard/pins_arduino.h
+ C:\Users\amoor\AppData\Local\Arduino15\packages\arduino\hardware\avr\1.8.5\variants\standard/pins_arduino.h \
+ d:\Automatic\ Control\ Systems\ Tasks\LineFollower\build\sketch\private.h

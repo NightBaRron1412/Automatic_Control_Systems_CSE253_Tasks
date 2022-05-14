@@ -7,9 +7,9 @@
 
  * Redistribution, modification or use of this software in source or binary
 
- * forms is permitted as long as the files maintain this copyright. 
+ * forms is permitted as long as the files maintain this copyright.
 
- * Amir Shetaia is not liable for any misuse of this material. 
+ * Amir Shetaia is not liable for any misuse of this material.
 
  *
 
@@ -27,191 +27,25 @@
 
  */
 # 16 "d:\\Automatic Control Systems Tasks\\LineFollower\\main.ino"
-/* Defining Senors pins */
+# 17 "d:\\Automatic Control Systems Tasks\\LineFollower\\main.ino" 2
 
+uint8_t u8Pos; /* A variable to store the current position of the robot */
+uint8_t u8TrackError = 0; /* A variable to store the current error value */
 
+/* PID Contorl gain values */
+float f32Kp = 40;
+float f32Ki = 0.45;
+float f32Kd = 1000;
+/* PID error values */
+float f32Error, f32ErrorLast, f32ErrorInt;
 
+/* Maximum speed value*/
+uint8_t u8MaxSpeed = 85;
 
-
-
-/* Defining Motor driver pins */
-
-
-
-
-
-/*--------------------------SPEED control Section-------------------*/
-
-void SpeedLogic(int spdL, int spdR) /* A function
-
-{
-
-    spdR = -spdR;
-
-
-
-    if (spdL < 0)
-
-    {
-
-        analogWrite(c2, 0);
-
-        analogWrite(c1, -spdL);
-
-    }
-
-    else
-
-    {
-
-        analogWrite(c2, spdL);
-
-        analogWrite(c1, 0);
-
-    }
-
-
-
-    if (spdR < 0)
-
-    {
-
-        analogWrite(c3, 0);
-
-        analogWrite(c4, -spdR);
-
-    }
-
-    else
-
-    {
-
-        analogWrite(c3, spdR);
-
-        analogWrite(c4, 0);
-
-    }
-
-}
-
-
-
-// /* Error Generation Section */
-# 59 "d:\\Automatic Control Systems Tasks\\LineFollower\\main.ino"
-/* =============================================================================== */
-
-int Error = 0;
-int outlineCnt = 0;
-
-void sensLogic(int X)
-{
-    switch (X)
-    {
-    case 0:
-        outlineCnt = 0;
-        Error = Error;
-        break;
-
-    case 31:
-        outlineCnt = 0;
-        Error = 0;
-        break;
-
-    case 2:
-    case 6:
-        outlineCnt = 0;
-        Error = 1;
-        break;
-
-    case 1:
-    case 3:
-    case 7:
-        outlineCnt = 0;
-        Error = 2;
-        break;
-
-    case 4:
-        outlineCnt = 0;
-        Error = 0;
-        break;
-
-    case 8:
-    case 12:
-        outlineCnt = 0;
-        Error = -1;
-        break;
-
-    case 16:
-    case 24:
-    case 28:
-        outlineCnt = 0;
-        Error = -2;
-        break;
-
-    default:
-        outlineCnt = 0;
-        Error = Error;
-        break;
-    }
-
-    if (outlineCnt > 2)
-    {
-        SpeedLogic(0, 0);
-    }
-    else
-    {
-
-        float ctrl = calcPid(Error);
-        SpeedLogic(85 - ctrl, 85 + ctrl);
-    }
-}
-
-/*=========================================================================================== */
-/* PID Contorl */
-float Kp = 40;
-float Ki = 0.45;
-float Kd = 1000;
-float error, errorLast, erroInt;
-
-float calcPid(float input)
-{
-    float errorDiff;
-    float output;
-    error = error * 0.7 + input * 0.3; // filter
-    // error = input;
-    errorDiff = error - errorLast;
-    erroInt = ((erroInt + error)<(-50)?(-50):((erroInt + error)>(50)?(50):(erroInt + error)));
-    output = Kp * error + Ki * erroInt + Kd * errorDiff;
-
-    errorLast = error;
-
-    return output;
-}
-
-/* Track data ===========================================================================*/
-int sensTrack()
-{
-    int ret = 0;
-    int a[5] = {digitalRead(4),
-                digitalRead(8),
-                digitalRead(10),
-                digitalRead(11),
-                digitalRead(7)};
-
-    for (int i = 0; i < 5; i++)
-    {
-        if (a[i] == 0x1)
-            ret += (0x1 << i);
-    }
-
-    return ret;
-}
-
-/* ======================================================================================== */
-
+/* ------------------------- Setup function ----------------------------- */
 void setup()
 {
-
+    /* Defining Pins Modes */
     pinMode(4, 0x0);
     pinMode(8, 0x0);
     pinMode(10, 0x0);
@@ -221,18 +55,129 @@ void setup()
     pinMode(5, 0x1);
     pinMode(6, 0x1);
     pinMode(9, 0x1);
+
+    /* Initializing motors speed at ZERO */
     analogWrite(3, 0);
     analogWrite(5, 0);
     analogWrite(6, 0);
     analogWrite(9, 0);
 }
 
-/* ==========================================================================================*/
-
-int pos;
+/* ------------------------- Loop function ----------------------------- */
 void loop()
 {
-    delay(4);
-    pos = sensTrack();
-    sensLogic(pos);
+    delay(4); /* Wait for 4 ms */
+    u8Pos = u8SensorsReading(); /* Read the current position of the robot */
+    VidError(u8Pos); /* Calculate the error value */
+}
+
+/*-------------------------- Reading sensors to determine robot postion -------------------*/
+uint8_t u8SensorsReading(void)
+{
+    uint8_t Local_u8Res = 0; /* A variable to store the current position of the robot in a binary form*/
+    uint8_t readings[5] = {digitalRead(4),
+                           digitalRead(8),
+                           digitalRead(10),
+                           digitalRead(11),
+                           digitalRead(7)}; /* Sensor readings */
+
+    for (uint8_t i = 0; i < 5; i++) /* looping through the sensors readings */
+    {
+        if (readings[i] == 0x1) /* if the sensor reading is HIGH */
+            Local_u8Res += (0x1 << i); /* adding the sensor reading to the binary form */
+    }
+
+    return Local_u8Res; /* returning the binary form of the current position of the robot */
+}
+
+/*-------------------------- Error Generation Section -------------------*/
+void VidError(uint8_t Copy_u8SensorsReading)
+{
+    switch (Copy_u8SensorsReading) /* Error generation logic */
+    {
+    case 0:
+        u8TrackError = u8TrackError;
+        break;
+
+    case 31:
+        u8TrackError = 0;
+        break;
+
+    case 2:
+    case 6:
+        u8TrackError = 1;
+        break;
+
+    case 1:
+    case 3:
+    case 7:
+        u8TrackError = 2;
+        break;
+
+    case 4:
+        u8TrackError = 0;
+        break;
+
+    case 8:
+    case 12:
+        u8TrackError = -1;
+        break;
+
+    case 16:
+    case 24:
+    case 28:
+        u8TrackError = -2;
+        break;
+
+    default:
+        u8TrackError = u8TrackError;
+        break;
+    }
+
+    float Local_f32Ctrl = f32CalcPID(u8TrackError); /* applying PID control */
+    VidSpeedLogic(u8MaxSpeed - Local_f32Ctrl, u8MaxSpeed + Local_f32Ctrl); /* controlling the motors based on PID Error */
+}
+
+/*-------------------------- PID control Section -------------------*/
+float f32CalcPID(uint8_t Copy_u8TrackError)
+{
+    float Local_f32ErrorDiff;
+    float Local_f32Output;
+    f32Error = f32Error * 0.7 + Copy_u8TrackError * 0.3; /* Filtering the error value */
+    /* error = Copy_u8TrackError; */
+    Local_f32ErrorDiff = f32Error - f32ErrorLast; /* Calculating the error difference */
+    f32ErrorInt = ((f32ErrorInt + f32Error)<(-50)?(-50):((f32ErrorInt + f32Error)>(50)?(50):(f32ErrorInt + f32Error))); /* Calculating the integral error */
+    Local_f32Output = f32Kp * f32Error + f32Ki * f32ErrorInt + f32Kd * Local_f32ErrorDiff; /* Calculating the PID output */
+
+    f32ErrorLast = f32Error; /* Saving the current error value */
+
+    return Local_f32Output;
+}
+
+/*--------------------------SPEED control Section-------------------*/
+void VidSpeedLogic(uint8_t Copy_u8SpdL, uint8_t Copy_u8SpdR)
+{
+    Copy_u8SpdR = -Copy_u8SpdR;
+
+    if (Copy_u8SpdL < 0)
+    {
+        analogWrite(5, 0);
+        analogWrite(3, -Copy_u8SpdL);
+    }
+    else
+    {
+        analogWrite(5, Copy_u8SpdL);
+        analogWrite(3, 0);
+    }
+
+    if (Copy_u8SpdR < 0)
+    {
+        analogWrite(6, 0);
+        analogWrite(9, -Copy_u8SpdR);
+    }
+    else
+    {
+        analogWrite(6, Copy_u8SpdR);
+        analogWrite(9, 0);
+    }
 }
